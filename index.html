@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pavan Kumar's Portfolio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- React and Babel CDNs for a single-file React app -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+            color: #e2e8f0;
+            transition: background-color 0.3s ease;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #63b3ed, #4299e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        .bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .bubbles div {
+            position: absolute;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(99, 179, 237, 0.2);
+            bottom: -150px;
+            animation: bubble 25s linear infinite;
+            border-radius: 50%;
+        }
+
+        .bubbles div:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .bubbles div:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .bubbles div:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .bubbles div:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        .bubbles div:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+        .bubbles div:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+        .bubbles div:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; }
+        .bubbles div:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+        .bubbles div:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+        .bubbles div:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+
+        @keyframes bubble {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 50%; }
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+        const { createRoot } = ReactDOM;
+
+        // The main App component containing all sections
+        const App = () => {
+            const sections = ['about', 'experience', 'projects', 'resume', 'ai-generator', 'contact'];
+            const [activeSection, setActiveSection] = useState('about');
+            const navRef = useRef(null);
+
+            const handleScroll = useCallback(() => {
+                const pageYOffset = window.pageYOffset;
+
+                let newActiveSection = null;
+                sections.forEach(sectionId => {
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                        const sectionTop = section.offsetTop;
+                        const sectionHeight = section.offsetHeight;
+                        if (pageYOffset >= sectionTop - 150 && pageYOffset < sectionTop + sectionHeight - 150) {
+                            newActiveSection = sectionId;
+                        }
+                    }
+                });
+                if (newActiveSection !== activeSection) {
+                    setActiveSection(newActiveSection);
+                }
+            }, [activeSection, sections]);
+
+            useEffect(() => {
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, [handleScroll]);
+
+            const scrollToSection = (id) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    window.scrollTo({
+                        top: element.offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            };
+
+            return (
+                <div className="bg-gray-900 text-gray-200 font-inter min-h-screen relative overflow-x-hidden">
+                    <div className="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden opacity-20">
+                        <canvas id="hero-particles" className="w-full h-full"></canvas>
+                    </div>
+
+                    <header ref={navRef} className="py-6 px-4 sm:px-6 lg:px-8 relative z-10 sticky top-0 bg-gray-900 bg-opacity-80 backdrop-blur-md transition-shadow duration-300 shadow-lg">
+                        <nav className="flex justify-between items-center max-w-7xl mx-auto">
+                            <div className="text-2xl font-bold text-blue-400">Pavan Kumar</div>
+                            <ul className="hidden md:flex space-x-8">
+                                {sections.map(section => (
+                                    <li key={section}>
+                                        <button
+                                            onClick={() => scrollToSection(section)}
+                                            className={`btn-link ${activeSection === section ? 'text-blue-400 font-semibold' : ''}`}
+                                        >
+                                            {section.charAt(0).toUpperCase() + section.slice(1).replace('-', ' ')}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className="md:hidden">
+                                <button id="menu-btn" className="text-gray-200 focus:outline-none">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </nav>
+                    </header>
+                    <div id="mobile-menu" className="hidden md:hidden fixed w-full z-20 bg-gray-900 bg-opacity-90 backdrop-blur-md py-4 transition-transform duration-300 transform -translate-y-full">
+                        <ul className="flex flex-col space-y-4 items-center">
+                            {sections.map(section => (
+                                <li key={section}>
+                                    <button
+                                        onClick={() => { scrollToSection(section); document.getElementById('mobile-menu').classList.add('-translate-y-full'); }}
+                                        className="btn-link text-gray-200"
+                                    >
+                                        {section.charAt(0).toUpperCase() + section.slice(1).replace('-', ' ')}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                        <Hero />
+                        <About />
+                        <Experience />
+                        <Projects />
+                        <Resume />
+                        <AIGenerator />
+                        <Contact />
+                    </main>
+
+                    <footer className="text-center py-6 text-gray-500">
+                        &copy; 2025 PAVANKUMAR CHAKALI. All Rights Reserved.
+                    </footer>
+                </div>
+            );
+        };
+
+        const Hero = () => {
+            const typedTextElement = useRef(null);
+            const phrases = [
+                "A passionate web developer.",
+                "A problem-solver and quick learner.",
+                "An aspiring software engineer.",
+                "A collaborative team player.",
+                "A detail-oriented content creator."
+            ];
+
+            useEffect(() => {
+                let phraseIndex = 0;
+                let charIndex = 0;
+                let isDeleting = false;
+
+                const type = () => {
+                    if (!typedTextElement.current) return;
+                    const currentPhrase = phrases[phraseIndex];
+                    const displayChar = isDeleting
+                        ? currentPhrase.substring(0, charIndex--)
+                        : currentPhrase.substring(0, charIndex++);
+
+                    typedTextElement.current.textContent = displayChar;
+
+                    let typingSpeed = 100;
+                    if (isDeleting) typingSpeed /= 2;
+
+                    if (!isDeleting && charIndex === currentPhrase.length + 1) {
+                        typingSpeed = 2000;
+                        isDeleting = true;
+                    } else if (isDeleting && charIndex === 0) {
+                        isDeleting = false;
+                        phraseIndex = (phraseIndex + 1) % phrases.length;
+                    }
+
+                    setTimeout(type, typingSpeed);
+                };
+
+                const canvas = document.getElementById('hero-particles');
+                const ctx = canvas.getContext('2d');
+                let particlesArray;
+                let animationFrameId;
+
+                const resizeCanvas = () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    initParticles();
+                };
+
+                const initParticles = () => {
+                    particlesArray = [];
+                    for (let i = 0; i < 100; i++) {
+                        particlesArray.push(new Particle());
+                    }
+                };
+
+                class Particle {
+                    constructor() {
+                        this.x = Math.random() * canvas.width;
+                        this.y = Math.random() * canvas.height;
+                        this.size = Math.random() * 5 + 1;
+                        this.speedX = Math.random() * 3 - 1.5;
+                        this.speedY = Math.random() * 3 - 1.5;
+                    }
+                    update() {
+                        this.x += this.speedX;
+                        this.y += this.speedY;
+                        if (this.size > 0.2) this.size -= 0.1;
+                    }
+                    draw() {
+                        ctx.fillStyle = '#63b3ed';
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                const animateParticles = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    for (let i = 0; i < particlesArray.length; i++) {
+                        particlesArray[i].update();
+                        particlesArray[i].draw();
+                    }
+                    animationFrameId = requestAnimationFrame(animateParticles);
+                };
+
+                window.addEventListener('load', () => {
+                    type();
+                    resizeCanvas();
+                    animateParticles();
+                });
+
+                window.addEventListener('resize', resizeCanvas);
+
+                return () => {
+                    window.removeEventListener('resize', resizeCanvas);
+                    if (animationFrameId) {
+                        cancelAnimationFrame(animationFrameId);
+                    }
+                };
+            }, []);
+
+            return (
+                <section id="hero" className="min-h-screen flex flex-col items-center justify-center text-center">
+                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 text-blue-400">
+                        Hello, I'm <span className="text-white">PAVANKUMAR CHAKALI</span>.
+                    </h1>
+                    <div className="h-12 flex items-center">
+                        <p ref={typedTextElement} className="text-lg sm:text-xl lg:text-2xl max-w-3xl mx-auto"></p>
+                    </div>
+                    <div className="mt-8 flex justify-center space-x-4">
+                        <a href="#projects" className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-full shadow-lg transition-colors duration-300">View My Work</a>
+                        <a href="#contact" className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-full shadow-lg transition-colors duration-300">Get In Touch</a>
+                    </div>
+                </section>
+            );
+        };
+
+        const About = () => (
+            <section id="about" className="py-20">
+                <h2 className="section-title text-center mb-12">About Me</h2>
+                <div className="flex flex-col lg:flex-row items-center lg:items-start lg:space-x-12">
+                    <img src="https://placehold.co/400x400/2d3748/e2e8f0?text=Pavan+Kumar" alt="Pavan Kumar's Photo" className="w-full lg:w-1/3 rounded-lg shadow-lg mb-8 lg:mb-0 transform hover:scale-105 transition-transform duration-300" />
+                    <div className="lg:w-2/3 text-lg space-y-6">
+                        <p>I am a third-year Computer Science Engineering student at VIT-AP University. I am an aspiring software developer with a solid foundation in web technologies and programming. My goal is to apply and expand my skills in a professional environment, and I am actively seeking an internship opportunity to contribute to impactful projects.</p>
+                        <p>My journey has given me hands-on experience in web development, with a strong focus on **HTML, CSS, and JavaScript**. I also have foundational knowledge in **Python, Java, and C**.</p>
+                        <p>I am a collaborative team player with a passion for problem-solving. Through my extracurricular activities with the NSS Club, I have developed strong teamwork and documentation skills. I believe in continuously learning to stay at the forefront of technology.</p>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const Experience = () => (
+            <section id="experience" className="py-20">
+                <h2 className="section-title text-center mb-12">Experience</h2>
+                <div className="bg-gray-800 p-8 rounded-lg shadow-lg">
+                    <div className="space-y-4">
+                        <div className="flex items-start space-x-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-400 flex-shrink-0 mt-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                            <div>
+                                <p className="font-bold text-xl text-blue-300">Internship at KAASH LIGHT ENGINEERS</p>
+                                <p className="text-sm text-gray-400">Current Role</p>
+                                <ul className="list-disc list-inside mt-2 space-y-1">
+                                    <li>Content Writing</li>
+                                    <li>Social Media Management</li>
+                                    <li>Research</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const Projects = () => {
+            const projects = [
+                {
+                    title: "Hotel Booking Management",
+                    description: "Developed a hotel booking platform using Firebase for backend and database management. This project showcases my ability to integrate and utilize cloud-based services for data storage and retrieval, demonstrating key skills in front-end development and service integration.",
+                    link: "https://pavankumarchakali-25.github.io/HotelBooking/",
+                    image: "https://placehold.co/600x400/2d3748/e2e8f0?text=Hotel+Booking"
+                },
+                {
+                    title: "Expense Tracker",
+                    description: "Designed and implemented a personal finance tool that tracks expenses using local storage, demonstrating a strong understanding of front-end data management.",
+                    link: "https://pavankumarchakali-25.github.io/ExpenseTracker/",
+                    image: "https://placehold.co/600x400/2d3748/e2e8f0?text=Expense+Tracker"
+                },
+                {
+                    title: "Todo List",
+                    description: "Created an interactive to-do list application, a fundamental web development project showcasing skills in HTML, CSS, and JavaScript with local storage persistence.",
+                    link: "https://pavankumarchakali-25.github.io/TodoList/",
+                    image: "https://placehold.co/600x400/2d3748/e2e8f0?text=Todo+List"
+                }
+            ];
+
+            const ProjectCard = ({ project }) => {
+                const cardRef = useRef(null);
+
+                const handleMouseMove = (e) => {
+                    if (!cardRef.current) return;
+                    const rect = cardRef.current.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const tiltX = (y - rect.height / 2) / 20;
+                    const tiltY = (x - rect.width / 2) / -20;
+                    cardRef.current.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+                };
+
+                const handleMouseLeave = () => {
+                    if (cardRef.current) {
+                        cardRef.current.style.transform = `perspective(1000px) rotateX(0) rotateY(0)`;
+                    }
+                };
+
+                return (
+                    <div
+                        ref={cardRef}
+                        className="project-card p-6 rounded-lg shadow-lg relative overflow-hidden group"
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMouseLeave}
+                    >
+                        <div className="absolute inset-0 border border-transparent group-hover:border-blue-400 transition-all duration-300 rounded-lg"></div>
+                        <img src={project.image} alt={project.title} className="rounded-lg mb-4 w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                        <h3 className="text-xl font-bold text-blue-300 mb-2">{project.title}</h3>
+                        <p className="text-gray-400 mb-4">{project.description}</p>
+                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full transition-colors duration-300">View Project</a>
+                    </div>
+                );
+            };
+
+            return (
+                <section id="projects" className="py-20">
+                    <h2 className="section-title text-center mb-12">Projects</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                        {projects.map((project, index) => (
+                            <ProjectCard key={index} project={project} />
+                        ))}
+                    </div>
+                    <p className="text-center text-sm text-gray-400 mt-8">I have also worked on several other minor projects, including a guessing game and a music recommendation system using Python and the Spotify API.</p>
+                </section>
+            );
+        };
+
+        const Resume = () => (
+            <section id="resume" className="py-20">
+                <h2 className="section-title text-center mb-12">Resume</h2>
+                <div className="bg-gray-800 p-8 rounded-lg shadow-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div>
+                            <h3 className="text-xl font-bold text-blue-300 mb-4">Education</h3>
+                            <ul className="space-y-4">
+                                <li>
+                                    <p className="font-semibold">B.Tech in Computer Science Engineering</p>
+                                    <p>VIT-AP University, 2023-2027</p>
+                                    <p className="text-sm text-gray-400">CGPA: 8.76</p>
+                                </li>
+                                <li>
+                                    <p className="font-semibold">Intermediate/12th Grade</p>
+                                    <p>Narayana Jr. College, 2021-2023</p>
+                                    <p className="text-sm text-gray-400">GPA: 9.76</p>
+                                </li>
+                                <li>
+                                    <p className="font-semibold">Secondary School</p>
+                                    <p>Sri Chaitanya E.M school, 2013-2021</p>
+                                    <p className="text-sm text-gray-400">GPA: 8.68</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-blue-300 mb-4">Skills</h3>
+                            <p className="font-semibold">Programming Languages:</p>
+                            <p>HTML, CSS, JavaScript, Python, Java (beginner), C (beginner)</p>
+                            <p className="font-semibold mt-4">Other Skills:</p>
+                            <ul className="list-disc list-inside mt-2 space-y-1">
+                                <li>Prompt Engineer</li>
+                                <li>WordPress Editor</li>
+                                <li>Teamwork</li>
+                                <li>Problem-solving</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-blue-300 mb-4">Training & Activities</h3>
+                            <p className="font-semibold">Training:</p>
+                            <p>Nxtwave: Hands-on training in Web Development and Software Development.</p>
+                            <p className="font-semibold mt-4">Extracurricular Activities:</p>
+                            <p>NSS Club: Documentation Team Member, actively contributed and volunteered.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const AIGenerator = () => {
+            const [prompt, setPrompt] = useState('');
+            const [generatedText, setGeneratedText] = useState('');
+            const [sources, setSources] = useState([]);
+            const [loading, setLoading] = useState(false);
+
+            const generateContent = async () => {
+                if (!prompt.trim()) {
+                    setGeneratedText("Please enter a prompt to generate content.");
+                    return;
+                }
+
+                setLoading(true);
+                setGeneratedText('');
+                setSources([]);
+
+                const systemPrompt = "Act as a world-class content writer and public relations professional. Provide a concise, single-paragraph summary of the key findings or ideas. The tone should be professional and engaging. Do not include a title.";
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    tools: [{ "google_search": {} }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    },
+                };
+
+                let retryCount = 0;
+                const maxRetries = 3;
+                const baseDelay = 1000;
+
+                const callApi = async () => {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`API call failed with status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        const candidate = result.candidates?.[0];
+
+                        if (candidate && candidate.content?.parts?.[0]?.text) {
+                            const text = candidate.content.parts[0].text;
+                            setGeneratedText(text);
+
+                            const groundingMetadata = candidate.groundingMetadata;
+                            if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                                const newSources = groundingMetadata.groundingAttributions
+                                    .map(attribution => ({
+                                        uri: attribution.web?.uri,
+                                        title: attribution.web?.title,
+                                    }))
+                                    .filter(source => source.uri && source.title);
+                                setSources(newSources);
+                            }
+                        } else {
+                            setGeneratedText("Sorry, I could not generate content for that prompt. Please try a different one.");
+                        }
+                    } catch (error) {
+                        if (retryCount < maxRetries) {
+                            retryCount++;
+                            const delay = baseDelay * Math.pow(2, retryCount - 1);
+                            setTimeout(callApi, delay);
+                        } else {
+                            console.error("Error calling Gemini API:", error);
+                            setGeneratedText("An error occurred. Please try again later.");
+                        }
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                callApi();
+            };
+
+            return (
+                <section id="ai-generator" className="py-20">
+                    <h2 className="section-title text-center mb-12">✨ AI Content Generator</h2>
+                    <div className="max-w-3xl mx-auto bg-gray-800 p-8 rounded-lg shadow-lg space-y-6">
+                        <p className="text-center text-gray-400">As a prompt engineer, I've integrated a tool that uses AI to generate content. Try it out by entering a topic below!</p>
+                        <div>
+                            <label htmlFor="prompt-input" className="block text-gray-400 mb-2">Enter your prompt:</label>
+                            <textarea id="prompt-input" rows="3" className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500" value={prompt} onChange={(e) => setPrompt(e.target.value)}></textarea>
+                        </div>
+                        <div className="text-center">
+                            <button
+                                onClick={generateContent}
+                                className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-full shadow-lg transition-colors duration-300 flex items-center justify-center mx-auto"
+                                disabled={loading}
+                            >
+                                {loading ? <div className="spinner"></div> : 'Generate Content'}
+                            </button>
+                        </div>
+                        <div id="generated-content" className="mt-6 p-4 bg-gray-700 rounded-lg border border-gray-600 space-y-4">
+                            {loading ? (
+                                <p className="text-center text-gray-400">Generating content...</p>
+                            ) : (
+                                <>
+                                    {generatedText ? (
+                                        <>
+                                            <p className="text-lg">{generatedText}</p>
+                                            {sources.length > 0 && (
+                                                <div className="text-sm text-gray-500">
+                                                    <p className="font-bold mt-4">Sources:</p>
+                                                    <ul className="list-disc list-inside">
+                                                        {sources.map((source, index) => (
+                                                            <li key={index}><a href={source.uri} target="_blank" rel="noopener noreferrer" className="hover:underline text-blue-400">{source.title}</a></li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <p className="text-center text-gray-400">Your generated content will appear here...</p>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const Contact = () => (
+            <section id="contact" className="py-20">
+                <h2 className="section-title text-center mb-12">Get In Touch</h2>
+                <div className="max-w-lg mx-auto">
+                    <form className="contact-form space-y-6">
+                        <div>
+                            <label htmlFor="name" className="block text-gray-400">Name</label>
+                            <input type="text" id="name" name="name" className="w-full mt-2 px-4 py-3 rounded-lg" required />
+                        </div>
+                        <div>
+                            <label htmlFor="email" className="block text-gray-400">Email</label>
+                            <input type="email" id="email" name="email" className="w-full mt-2 px-4 py-3 rounded-lg" required />
+                        </div>
+                        <div>
+                            <label htmlFor="message" className="block text-gray-400">Message</label>
+                            <textarea id="message" name="message" rows="5" className="w-full mt-2 px-4 py-3 rounded-lg" required></textarea>
+                        </div>
+                        <div className="text-center">
+                            <button type="submit" className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-full shadow-lg">Send Message</button>
+                        </div>
+                    </form>
+                    <div className="mt-8 text-center space-x-6 flex justify-center items-center">
+                        <a href="mailto:c.pavan9949@gmail.com" className="btn-link text-gray-400 hover:text-blue-400">Email</a>
+                        <a href="https://www.linkedin.com/in/pavan-kumar-chakali-36a805290" target="_blank" rel="noopener noreferrer" className="btn-link text-gray-400 hover:text-blue-400">LinkedIn</a>
+                        <a href="#" target="_blank" rel="noopener noreferrer" className="btn-link text-gray-400 hover:text-blue-400">GitHub</a>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const container = document.getElementById('root');
+        const root = createRoot(container);
+        root.render(<App />);
+
+        // Mobile menu toggle logic outside of React components
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            if (menuBtn && mobileMenu) {
+                menuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('-translate-y-full');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
