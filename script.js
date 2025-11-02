@@ -4,16 +4,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const sections = ['about', 'experience', 'projects', 'resume', 'contact'];
     let activeSection = 'about'; // Default active section
 
-    // --- Navigation and Scrolling ---
-    const navLinksContainer = document.getElementById('nav-links');
+    // --- Element Selectors ---
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const mobileMenuIcon = mobileMenuBtn.querySelector('svg');
     const mobileNavButtons = document.querySelectorAll('.nav-btn-mobile');
     const desktopNavButtons = document.querySelectorAll('.nav-btn');
+    const typedTextElement = document.getElementById('typed-text');
+    const canvas = document.getElementById('hero-particles');
+    const projectCards = document.querySelectorAll('.project-card');
+    const contactForm = document.getElementById('contact-form');
+    const copyEmailBtn = document.getElementById('copy-email-btn');
+    
     let isMenuOpen = false;
+    let mobileMenuIcon = mobileMenuBtn ? mobileMenuBtn.querySelector('svg') : null;
 
-    // Function to scroll to a specific section
+    // --- Core Functions ---
+
+    /**
+     * Toggles the mobile navigation menu.
+     */
+    function toggleMobileMenu() {
+        isMenuOpen = !isMenuOpen;
+        if (mobileMenu) {
+            mobileMenu.classList.toggle('hidden');
+        }
+        
+        // Toggle hamburger/close icon
+        if (mobileMenuIcon) {
+            if (isMenuOpen) {
+                mobileMenuIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+            } else {
+                mobileMenuIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>';
+            }
+        }
+    }
+
+    /**
+     * Scrolls smoothly to a given section by its ID.
+     * @param {string} id - The ID of the section to scroll to.
+     */
     function scrollToSection(id) {
         const element = document.getElementById(id);
         if (element) {
@@ -28,28 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Add click listeners to all navigation buttons
-    desktopNavButtons.forEach(btn => {
-        btn.addEventListener('click', () => scrollToSection(btn.dataset.section));
-    });
-    mobileNavButtons.forEach(btn => {
-        btn.addEventListener('click', () => scrollToSection(btn.dataset.section));
-    });
-
-    // Function to toggle the mobile menu
-    function toggleMobileMenu() {
-        isMenuOpen = !isMenuOpen;
-        mobileMenu.classList.toggle('hidden');
-        // Toggle hamburger/close icon
-        if (isMenuOpen) {
-            mobileMenuIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
-        } else {
-            mobileMenuIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>';
-        }
-    }
-    mobileMenuBtn.addEventListener('click', toggleMobileMenu);
-
-    // Function to update active nav link on scroll
+    /**
+     * Updates the active navigation link based on scroll position.
+     */
     function handleScroll() {
         const pageYOffset = window.pageYOffset;
         let newActiveSection = null;
@@ -77,11 +87,30 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+    // --- Event Listener Assignments ---
+
+    // Navigation Scrolling
+    desktopNavButtons.forEach(btn => {
+        btn.addEventListener('click', () => scrollToSection(btn.dataset.section));
+    });
+
+    mobileNavButtons.forEach(btn => {
+        btn.addEventListener('click', () => scrollToSection(btn.dataset.section));
+    });
+
+    // Mobile Menu Toggle
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+    } else {
+        console.warn("Mobile menu button '#mobile-menu-btn' not found.");
+    }
+
+    // Active Nav Highlighting on Scroll
     window.addEventListener('scroll', handleScroll);
 
 
     // --- Hero Section: Typing Effect ---
-    const typedTextElement = document.getElementById('typed-text');
     if (typedTextElement) {
         const phrases = [
             "A passionate web developer.",
@@ -120,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Hero Section: Particle Animation ---
-    const canvas = document.getElementById('hero-particles');
     if (canvas) {
         const ctx = canvas.getContext('2d');
         let particlesArray;
@@ -177,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Projects Section: 3D Tilt Effect ---
-    const projectCards = document.querySelectorAll('.project-card');
     projectCards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
@@ -194,20 +221,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Contact Section: Form Submission ---
-    const contactForm = document.getElementById('contact-form');
-    const submitBtn = document.getElementById('contact-submit-btn');
-    const statusSuccess = document.getElementById('contact-status-success');
-    const statusError = document.getElementById('contact-status-error');
-
     if (contactForm) {
+        const submitBtn = document.getElementById('contact-submit-btn');
+        const statusSuccess = document.getElementById('contact-status-success');
+        const statusError = document.getElementById('contact-status-error');
+
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="spinner mx-auto"></div>';
-            statusSuccess.classList.add('hidden');
-            statusError.classList.add('hidden');
+            if(submitBtn) submitBtn.disabled = true;
+            if(submitBtn) submitBtn.innerHTML = '<div class="spinner mx-auto"></div>';
+            if(statusSuccess) statusSuccess.classList.add('hidden');
+            if(statusError) statusError.classList.add('hidden');
 
             const form = e.target;
             const data = new FormData(form);
@@ -220,28 +246,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
-                    statusSuccess.classList.remove('hidden');
+                    if(statusSuccess) statusSuccess.classList.remove('hidden');
                     form.reset();
                 } else {
-                    statusError.classList.remove('hidden');
+                    if(statusError) statusError.classList.remove('hidden');
                 }
             } catch (error) {
-                statusError.classList.remove('hidden');
+                if(statusError) statusError.classList.remove('hidden');
             } finally {
                 // Reset button
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Send Message';
+                if(submitBtn) submitBtn.disabled = false;
+                if(submitBtn) submitBtn.innerHTML = 'Send Message';
                 // Hide status messages after 3 seconds
                 setTimeout(() => {
-                    statusSuccess.classList.add('hidden');
-                    statusError.classList.add('hidden');
+                    if(statusSuccess) statusSuccess.classList.add('hidden');
+                    if(statusError) statusError.classList.add('hidden');
                 }, 3000);
             }
         });
     }
 
     // --- Contact Section: Copy Email ---
-    const copyEmailBtn = document.getElementById('copy-email-btn');
     if (copyEmailBtn) {
         const emailAddress = 'c.pavan9949@gmail.com';
         
@@ -270,3 +295,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
